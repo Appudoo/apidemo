@@ -29,7 +29,7 @@ public class test : MonoBehaviour
         WWW web = new WWW("http://localhost:3000/all");
         
         yield return web;
-        Debug.Log(web.text);
+      
         JSONArray jSONArray = (JSONArray)JSON.Parse(web.text);
 
         for (int i = 0; i < jSONArray.Count; i++)
@@ -46,7 +46,7 @@ public class test : MonoBehaviour
     void onclick(string str)
     {
         Debug.Log(str);
-       
+        StartCoroutine(getpuzzle(str));
        
     }
 
@@ -57,7 +57,8 @@ public class test : MonoBehaviour
         yield return pzl_data;
         JSONArray jSON = (JSONArray)JSON.Parse(pzl_data.text);
         Debug.Log(pzl_data.text);
-        Debug.Log(jSON.Count);
+        Debug.Log(jSON[0]["word"]);
+      
     }
     
 }
