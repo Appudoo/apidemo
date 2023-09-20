@@ -25,8 +25,7 @@ public class test : MonoBehaviour
     IEnumerator getdata()
     {
         WWW web = new WWW("http://localhost:3000/all");
-        WWW images = new WWW("http://localhost:3000/images");
-        Debug.Log(images);
+        
         yield return web;
         Debug.Log(web.text);
         JSONArray jSONArray = (JSONArray)JSON.Parse(web.text);
