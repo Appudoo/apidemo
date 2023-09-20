@@ -1,4 +1,5 @@
 using SimpleJSON;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,7 @@ public class test : MonoBehaviour
     void Start()
     {
         StartCoroutine(getdata());
+        StartCoroutine(getpuzzle());
     }
 
     // Update is called once per frame
@@ -40,8 +42,22 @@ public class test : MonoBehaviour
         }
 
     }
+
     void onclick(string str)
     {
         Debug.Log(str);
+       
+       
     }
+
+    IEnumerator getpuzzle(string str = "650a8a6df3821b0d15a68555")
+    {
+        Debug.Log(str);
+        WWW pzl_data = new WWW("localhost:3000/puzzleBycat/"+ str);
+        yield return pzl_data;
+        JSONArray jSON = (JSONArray)JSON.Parse(pzl_data.text);
+        Debug.Log(pzl_data.text);
+        Debug.Log(jSON.Count);
+    }
+    
 }
