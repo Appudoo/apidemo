@@ -7,6 +7,9 @@
 var app = require('../app');
 var debug = require('debug')('puzzle:server');
 var http = require('http');
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://127.0.0.1:27017/puzzle_game')
+    .then(() => console.log('Connected!'));
 
 /**
  * Get port from environment and store in Express.

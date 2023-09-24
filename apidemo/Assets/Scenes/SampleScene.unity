@@ -396,6 +396,7 @@ GameObject:
   - component: {fileID: 508893940}
   - component: {fileID: 508893942}
   - component: {fileID: 508893941}
+  - component: {fileID: 508893943}
   m_Layer: 5
   m_Name: Down footer
   m_TagString: Untagged
@@ -420,8 +421,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -813.92194}
-  m_SizeDelta: {x: 1080, y: 292.1461}
+  m_AnchoredPosition: {x: 0, y: -801}
+  m_SizeDelta: {x: 1080, y: 335.0858}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &508893941
 MonoBehaviour:
@@ -461,6 +462,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 508893939}
   m_CullTransparentMesh: 1
+--- !u!114 &508893943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 508893939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 15
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_StartCorner: 0
+  m_StartAxis: 0
+  m_CellSize: {x: 145, y: 145}
+  m_Spacing: {x: 10, y: 10}
+  m_Constraint: 1
+  m_ConstraintCount: 7
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -731,6 +756,8 @@ MonoBehaviour:
   puzzle: {fileID: 1978070303}
   play: {fileID: 1478715209}
   puzzle_img: {fileID: 1440432493}
+  mix_p: {fileID: 5148875531399254880, guid: cb63b6cc77ac68449969f9c4ce26a7fd, type: 3}
+  Ans_word: {fileID: 5321165320980109257, guid: 2c6f0af37eed94b4780c1f3a2ef1482d, type: 3}
   parent: {fileID: 537756297}
   btn:
   - {fileID: 0}
@@ -746,6 +773,8 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   parent2: {fileID: 1113062012}
+  mixbtn_p: {fileID: 508893940}
+  Ans_word_p: {fileID: 1757769982}
   btn2:
   - {fileID: 0}
   - {fileID: 0}
@@ -1278,7 +1307,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1478715210
 MonoBehaviour:
   m_ObjectHideFlags: 0
