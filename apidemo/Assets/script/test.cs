@@ -10,28 +10,33 @@ using static UnityEditor.PlayerSettings;
 
 public class test : MonoBehaviour
 {
-    public GameObject prefab, home, puzzle, play, puzzle_img, mix_p, Ans_word;
+    public static test inst;
+    //public win_page win_Page;
+    public GameObject prefab, home, puzzle, play, puzzle_img, mix_p, Ans_word,win_page;
     public Transform parent;
     public GameObject[] btn = new GameObject[12];
     public Transform parent2, mixbtn_p, Ans_word_p;
     public GameObject[] btn2 = new GameObject[12];
     public GameObject prefab2;
-    
+
     GameObject[] MixBtn = new GameObject[14];
     GameObject[] fBtn = new GameObject[14];
     int cnt = 0;
     char[] word1 = new char[14];
     char[] wrong_ans = new char[14];
+    bool isended;
+    public Sprite green;
 
     // Start is called before the firt frame update
     void Start()
     {
+        inst = this;
         StartCoroutine(getdata());
-
         for (int i = 0; i < 26; i++)
         {
             alphabetArray[i] = ((char)('a' + i)).ToString();
         }
+        
         //StartCoroutine(getpuzzle());
     }
 
@@ -40,8 +45,14 @@ public class test : MonoBehaviour
     {
 
     }
+    //public test (win_page win_Page)
+    //{
+    //    this.win_Page = win_Page;
+
+    //}
     IEnumerator getdata()
     {
+      
         WWW web = new WWW("http://localhost:3000/all");
 
         yield return web;
@@ -67,7 +78,7 @@ public class test : MonoBehaviour
     IEnumerator getpuzzle(string str)
     {
 
-
+        
         home.SetActive(false);
         puzzle.SetActive(true);
         WWW pzl_data = new WWW("http://localhost:3000/puzzleBycat/" + str);
@@ -78,12 +89,12 @@ public class test : MonoBehaviour
         {
             btn2[i] = Instantiate(prefab2, parent2);
 
-            btn2[i].transform.GetChild(1).GetComponent<Text>().text = jSON[i]["puzzle_name"].Value;
+            btn2[i].transform.GetChild(0).GetComponent<Text>().text = (i+1).ToString();
             string pzl_id = jSON[i]["_id"];
             WWW webImg = new WWW("http://localhost:3000/images/" + jSON[i]["Image"]);
             yield return webImg;
             Texture2D texture = webImg.texture;
-            btn2[i].transform.GetChild(0).GetComponent<RawImage>().texture = texture;
+            //btn2[i].transform.GetChild(0).GetComponent<RawImage>().texture = texture;
             btn2[i].GetComponent<Button>().onClick.AddListener(() => StartCoroutine(get_Single_puzzle(pzl_id)));
         }
     }
@@ -141,87 +152,86 @@ public class test : MonoBehaviour
             MixBtn[i].transform.GetChild(0).GetComponent<Text>().text = wrong_ans[i].ToString();
             string ch = wrong_ans[i].ToString();
             int temp = i;
-            MixBtn[i].GetComponent<Button>().onClick.AddListener(() => onclick_mix_btn(ch, temp));
+            MixBtn[i].GetComponent<Button>().onClick.AddListener(() => onclick_mix_btn(ch, temp, jSON));
+            Debug.Log(word1.Length);
+            
         }
     }
 
-
-    //void onclick_mix_btn(string ch, int pos)
-    //{
-    //    for (int i = 0; i < fBtn.Length; i++)
-    //    {
-    //        if (fBtn[i].GetComponentInChildren<Text>().text == "")
-    //        {
-    //            fBtn[i].transform.GetChild(0).GetComponent<Text>().text = ch;
-    //            cnt++;
-    //            MixBtn[pos].transform.GetChild(0).GetComponent<Text>().text = "";
-    //            MixBtn[pos].GetComponent<Button>().interactable = false;
-
-    //            fBtn[i].GetComponent<Button>().onClick.AddListener(() => onclick_return(ch, pos, i));
-    //            break;
-    //        }
-    //    }
-    //}
-    //void onclick_return(string str, int pos, int i)
-    //{
-    //    MixBtn[pos].transform.GetChild(0).GetComponent<Text>().text = str;
-    //    cnt--;
-    //    fBtn[i].transform.GetChild(0).GetComponent<Text>().text = "";
-    //}
-
-    void onclick_mix_btn(string mix, int pos)
+    void onclick_mix_btn(string mix, int pos, JSONArray jSON)
     {
-
+        if(isended)
+        {
+            Debug.Log("return");
+            return;
+        }
 
         for (int k = 0; k < fBtn.Length; k++)
         {
-            //btn[k].transform.getchild(0).getcomponent<text>().text = mix;
-            //k++;
-            //return;
+            
             if (fBtn[k].GetComponentInChildren<Text>().text == "")
             {
                 fBtn[k].transform.GetChild(0).GetComponent<Text>().text = mix;
                 cnt++;
                 MixBtn[pos].transform.GetChild(0).GetComponent<Text>().text = "";
                 MixBtn[pos].GetComponent<Button>().interactable = false;
-                fBtn[k].GetComponent<Button>().onClick.AddListener(() => onclick_return(mix, pos, k));
-
-
+                //string s = jSON[k]["word"];
+                //if (cnt == s.Length)
+                //{
+                //    Debug.Log("full");
+                //}
+                fBtn[k].GetComponent<Button>().onClick.AddListener(() => onclick_return(mix, pos, k, jSON));
+                
+               win(jSON[0]["word"]);
                 break;
             }
-            else
-            {
 
-                win();
-            }
         }
     }
-    void onclick_return(string s, int pos, int k)
+
+
+    void onclick_return(string s, int pos, int k, JSONArray json)
     {
 
         MixBtn[pos].transform.GetChild(0).GetComponent<Text>().text = s;
         MixBtn[pos].GetComponent<Button>().interactable = true;
         fBtn[k].transform.GetChild(0).GetComponent<Text>().text = "";
         cnt--;
-        win();
+         win(json[0]["word"]);
 
     }
-    void win()
+    void win(string Final_ans)
     {
-        //string str = "";
-        //for (int i = 0; i < fBtn.Length; i++)
-        //{
-        //    str = str + fBtn[i].transform.GetChild(0).GetComponent<Text>().text;
-        //}
-        //Debug.Log(str);
-        if (fBtn[word1.Length - 1].transform.GetChild(0).GetComponent<Text>().text == "")
+        
+        Debug.Log(cnt+"   "+Final_ans.Length);
+        char[] str;
+        if (cnt == Final_ans.Length)
         {
-            for (int k = 0; k < wrong_ans.Length; k++)
+            str = new char[cnt];
+            for (int i = 0; i < cnt; i++)
             {
-                MixBtn[k].GetComponent<Button>().interactable = true;
+                str[i] = char.Parse(fBtn[i].transform.GetChild(0).GetComponent<Text>().text);
 
             }
-        }
+            
+            string s = new string(str);
+            Debug.Log(s);
+            if(s == Final_ans)
+            {
+                isended = true;
+                //level.instance.gen(s);
+                PlayerPrefs.SetString("ans", Final_ans);
+                win_page.SetActive(true);
+                play.SetActive(false);
+                for (int i = 0; i < cnt; i++)
+                {
+                    Debug.Log(fBtn[i].gameObject.name);
+                    fBtn[i].GetComponent<Image>().sprite = green;
+                    fBtn[i].GetComponent<Button>().interactable = false;
+                }
+            }
+        }   
+       
     }
 
 }
