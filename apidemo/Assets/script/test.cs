@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEditor.PlayerSettings;
+using UnityEngine.SceneManagement;
 
 
 public class test : MonoBehaviour
@@ -18,6 +19,7 @@ public class test : MonoBehaviour
     public Transform parent2, mixbtn_p, Ans_word_p;
     public GameObject[] btn2 = new GameObject[12];
     public GameObject prefab2;
+    public int level_no,L_no=1;
 
     GameObject[] MixBtn = new GameObject[14];
     GameObject[] fBtn = new GameObject[14];
@@ -26,6 +28,7 @@ public class test : MonoBehaviour
     char[] wrong_ans = new char[14];
     bool isended;
     public Sprite green;
+    
 
     // Start is called before the firt frame update
     void Start()
@@ -84,6 +87,8 @@ public class test : MonoBehaviour
         WWW pzl_data = new WWW("http://localhost:3000/puzzleBycat/" + str);
         yield return pzl_data;
         JSONArray jSON = (JSONArray)JSON.Parse(pzl_data.text);
+        level_no = jSON.Count;
+        
         Debug.Log(pzl_data.text);
         for (int i = 0; i < jSON.Count; i++)
         {
@@ -94,9 +99,11 @@ public class test : MonoBehaviour
             WWW webImg = new WWW("http://localhost:3000/images/" + jSON[i]["Image"]);
             yield return webImg;
             Texture2D texture = webImg.texture;
+            btn2[i].GetComponent<Button>().interactable = false;
             //btn2[i].transform.GetChild(0).GetComponent<RawImage>().texture = texture;
             btn2[i].GetComponent<Button>().onClick.AddListener(() => StartCoroutine(get_Single_puzzle(pzl_id)));
         }
+        level();
     }
 
     IEnumerator get_Single_puzzle(string str)
@@ -114,6 +121,14 @@ public class test : MonoBehaviour
         Texture2D pzl_img = get_img.texture;
         puzzle_img.GetComponent<RawImage>().texture = pzl_img;
         word_logic(jSON);
+    }
+    void level()
+    {
+        Debug.Log(L_no);
+        for (int i = 0; i < L_no; i++)
+        {
+            btn2[i].GetComponent<Button>().interactable = true;
+        }
     }
     string[] alphabetArray = new string[26];
     void word_logic(JSONArray jSON)
@@ -221,6 +236,7 @@ public class test : MonoBehaviour
                 isended = true;
                 //level.instance.gen(s);
                 PlayerPrefs.SetString("ans", Final_ans);
+                
                 win_page.SetActive(true);
                 play.SetActive(false);
                 for (int i = 0; i < cnt; i++)
@@ -232,6 +248,13 @@ public class test : MonoBehaviour
             }
         }   
        
+    }
+    public void onclickOnword()
+    {
+        L_no++;
+        //win_page.SetActive(false);
+        //puzzle.SetActive(true);
+        SceneManager.LoadScene(Application.loadedLevel);
     }
 
 }

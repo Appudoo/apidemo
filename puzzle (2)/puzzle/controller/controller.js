@@ -20,7 +20,8 @@ exports.add_sub = async (req,res)=>{
     var data = await sub_category.create({
         sub_category : sub_name,
         category_id : cat_id
-    });
+    });\
+    var data = await puzzle.findByIdAndUpdate(7)
     res.status(200).json({
         status:"sub_cat inserted"
     })
