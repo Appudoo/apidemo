@@ -7,7 +7,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UnityEditor.PlayerSettings;
 using UnityEngine.SceneManagement;
-
+using JetBrains.Annotations;
+using UnityEngine.Networking;
+using System.Net;
 
 public class test : MonoBehaviour
 {
@@ -59,6 +61,7 @@ public class test : MonoBehaviour
         WWW web = new WWW("http://localhost:3000/all");
 
         yield return web;
+        
 
         JSONArray jSONArray = (JSONArray)JSON.Parse(web.text);
 
@@ -99,11 +102,25 @@ public class test : MonoBehaviour
             WWW webImg = new WWW("http://localhost:3000/images/" + jSON[i]["Image"]);
             yield return webImg;
             Texture2D texture = webImg.texture;
-            btn2[i].GetComponent<Button>().interactable = false;
+            //btn2[i].GetComponent<Button>().interactable = false;
             //btn2[i].transform.GetChild(0).GetComponent<RawImage>().texture = texture;
             btn2[i].GetComponent<Button>().onClick.AddListener(() => StartCoroutine(get_Single_puzzle(pzl_id)));
         }
-        level();
+        //level();
+    }
+
+    IEnumerator example(string str)
+    {
+        WWWForm data = new WWWForm();
+        data.AddField("status", 3);
+        UnityWebRequest  web=   UnityWebRequest.Post("http://localhost:3000/update/"+ str, data);
+        yield return web.SendWebRequest();
+        //Debug.Log(" unity web Req =  "+web.downloadHandler.text);
+        //JSONArray json = (JSONArray)JSON.Parse(web.downloadHandler.text);
+        if(web.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("success");
+        }
     }
 
     IEnumerator get_Single_puzzle(string str)
@@ -122,14 +139,14 @@ public class test : MonoBehaviour
         puzzle_img.GetComponent<RawImage>().texture = pzl_img;
         word_logic(jSON);
     }
-    void level()
-    {
-        Debug.Log(L_no);
-        for (int i = 0; i < L_no; i++)
-        {
-            btn2[i].GetComponent<Button>().interactable = true;
-        }
-    }
+    //void level()
+    //{
+    //    Debug.Log(L_no);
+    //    for (int i = 0; i < L_no; i++)
+    //    {
+    //        btn2[i].GetComponent<Button>().interactable = true;
+    //    }
+    //}
     string[] alphabetArray = new string[26];
     void word_logic(JSONArray jSON)
     {
@@ -197,7 +214,7 @@ public class test : MonoBehaviour
                 //}
                 fBtn[k].GetComponent<Button>().onClick.AddListener(() => onclick_return(mix, pos, k, jSON));
                 
-               win(jSON[0]["word"]);
+               win(jSON);
                 break;
             }
 
@@ -212,12 +229,12 @@ public class test : MonoBehaviour
         MixBtn[pos].GetComponent<Button>().interactable = true;
         fBtn[k].transform.GetChild(0).GetComponent<Text>().text = "";
         cnt--;
-         win(json[0]["word"]);
+         win(json);
 
     }
-    void win(string Final_ans)
+    void win(JSONArray json)
     {
-        
+        string Final_ans = json[0]["word"];
         Debug.Log(cnt+"   "+Final_ans.Length);
         char[] str;
         if (cnt == Final_ans.Length)
@@ -236,7 +253,8 @@ public class test : MonoBehaviour
                 isended = true;
                 //level.instance.gen(s);
                 PlayerPrefs.SetString("ans", Final_ans);
-                
+                StartCoroutine(example(json[0]["_id"]));
+
                 win_page.SetActive(true);
                 play.SetActive(false);
                 for (int i = 0; i < cnt; i++)

@@ -13,15 +13,24 @@ exports.add_cat =async (req,res)=>{
         data
     })
 }
-
+exports.update = async (req,res)=>{
+    var data = await puzzle.findByIdAndUpdate(req.params.id,{
+        status:req.body.status
+    })
+    res.status(200).json(
+        
+        data
+    )
+    // console.log(data);
+}
 exports.add_sub = async (req,res)=>{
     var cat_id = req.params.cat_id;
     var sub_name = req.body.sub_category
     var data = await sub_category.create({
         sub_category : sub_name,
         category_id : cat_id
-    });\
-    var data = await puzzle.findByIdAndUpdate(7)
+    });
+    
     res.status(200).json({
         status:"sub_cat inserted"
     })

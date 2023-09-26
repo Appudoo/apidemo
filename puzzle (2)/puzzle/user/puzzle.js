@@ -15,6 +15,9 @@ var puzzle = new mongoose.Schema({
     },
     word:{
         type:String
+    },
+    status:{
+        type:Number
     }
 
 })
