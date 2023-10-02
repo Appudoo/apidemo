@@ -29,7 +29,7 @@ public class test : MonoBehaviour
     int cnt = 0;
     char[] word1 = new char[14];
     char[] wrong_ans = new char[14];
-    bool isended, isplayed;
+    bool isended, isplayed, isskiped;
     public Sprite green;
 
 
@@ -110,7 +110,7 @@ public class test : MonoBehaviour
             //btn2[i].transform.GetChild(0).GetComponent<RawImage>().texture = texture;
             btn2[i].GetComponent<Button>().onClick.AddListener(() => StartCoroutine(get_Single_puzzle(pzl_id, temp)));
         }
-        level();
+        level_M();
     }
 
     IEnumerator example(string str)
@@ -129,6 +129,9 @@ public class test : MonoBehaviour
 
     IEnumerator get_Single_puzzle(string str, int pos)
     {
+        cnt = 0;
+        spkiped = 0;
+        Debug.Log("get puzzle called");
         if (pos < L_no)
         {
             isplayed = true;
@@ -143,6 +146,7 @@ public class test : MonoBehaviour
         play.SetActive(true);
         WWW GetSingle_puzzle = new WWW("http://localhost:3000/puzzle/" + str);
         yield return GetSingle_puzzle;
+        Debug.Log(GetSingle_puzzle.text);
         jSON = (JSONArray)JSON.Parse(GetSingle_puzzle.text);
         Debug.Log(jSON[0]);
         WWW get_img = new WWW("http://localhost:3000/images/" + jSON[0]["Image"]);
@@ -151,19 +155,23 @@ public class test : MonoBehaviour
         puzzle_img.GetComponent<RawImage>().texture = pzl_img;
         word_logic(jSON);
     }
-    void level()
+    void level_M()
     {
         Debug.Log(L_no);
-        for (int i = 0; i < L_no; i++)
+
+        if (L_no < total_level)
         {
-            btn2[i].GetComponent<Button>().interactable = true;
 
-            if (i < L_no - 1)
+            for (int i = 0; i < L_no; i++)
             {
-                btn2[i].GetComponent<Image>().sprite = green;
+                btn2[i].GetComponent<Button>().interactable = true;
+
+                if (i < L_no - 1)
+                {
+                    btn2[i].transform.GetChild(1).GetComponent<Image>().enabled = true;
+                }
+
             }
-
-
         }
     }
     string[] alphabetArray = new string[26];
@@ -171,10 +179,25 @@ public class test : MonoBehaviour
     {
         string word = (jSON[0]["word"]);
         word1 = word.ToCharArray();
+    START:
+        if (Ans_word_p.childCount > 0)
+        {
+
+            for (int i = 0; i < Ans_word_p.childCount; i++)
+            {
+                DestroyImmediate(Ans_word_p.GetChild(i).gameObject);
+            }
+        }
+        if (Ans_word_p.childCount > 0)
+        {
+            goto START;
+        }
         for (int i = 0; i < word1.Length; i++)
         {
             fBtn[i] = Instantiate(Ans_word, Ans_word_p);
         }
+
+
         int missing_word = 14 - word.Length;
 
         List<string> mixword = new List<string>();
@@ -197,6 +220,19 @@ public class test : MonoBehaviour
         }
         string fAns = string.Join("", mixword);
         wrong_ans = fAns.ToCharArray();
+        START1:
+        if (mixbtn_p.childCount > 0)
+        {
+
+            for (int i = 0; i < mixbtn_p.childCount; i++)
+            {
+                DestroyImmediate(mixbtn_p.GetChild(i).gameObject);
+            }
+        }
+        if (mixbtn_p.childCount > 0)
+        {
+            goto START1;
+        }
         for (int i = 0; i < wrong_ans.Length; i++)
         {
             MixBtn[i] = Instantiate(mix_p, mixbtn_p);
@@ -245,10 +281,10 @@ public class test : MonoBehaviour
                 //{
                 //    Debug.Log("full");
                 //}
-                
+
                 fBtn[k].GetComponent<Button>().onClick.AddListener(() => onclick_return(mix, pos, k, jSON));
 
-                win(jSON);
+                StartCoroutine(win(jSON));
                 break;
             }
 
@@ -267,12 +303,13 @@ public class test : MonoBehaviour
         MixBtn[pos].GetComponent<Button>().interactable = true;
         fBtn[k].transform.GetChild(0).GetComponent<Text>().text = "";
         cnt--;
-        win(json);
+       StartCoroutine(win(json));
 
     }
-    void win(JSONArray json)
+    IEnumerator win(JSONArray json)
     {
         string Final_ans = json[0]["word"];
+        Debug.Log("  word  "+json[0]["word"]);
         Debug.Log(cnt + "   " + Final_ans.Length);
         char[] str;
         if (cnt == Final_ans.Length)
@@ -289,8 +326,9 @@ public class test : MonoBehaviour
             if (s.ToLower() == Final_ans.ToLower())
             {
                 isended = true;
-                //level.instance.gen(s);
-                PlayerPrefs.SetString("ans", Final_ans);
+                PlayerPrefs.SetString("ans", jSON_getpuzzle[L_no-1]["word"]);
+                string word = jSON_getpuzzle[L_no-1]["word"];
+                //level.instance.Start();  
                 //StartCoroutine(example(json[0]["_id"]));
                 for (int i = 0; i < L_no - 1; i++)
                 {
@@ -301,16 +339,19 @@ public class test : MonoBehaviour
                     L_no++;
                     PlayerPrefs.SetInt("max_" + json[0]["cat_id"], L_no);
                 }
+                Debug.Log(word);
 
-                win_page.SetActive(true);
-                play.SetActive(false);
+
+
                 for (int i = 0; i < cnt; i++)
                 {
                     Debug.Log(fBtn[i].gameObject.name);
                     fBtn[i].GetComponent<Image>().sprite = green;
                     fBtn[i].GetComponent<Button>().interactable = false;
                 }
-
+                yield return new WaitForSeconds(2f);
+                win_page.SetActive(true);
+                play.SetActive(false);
             }
         }
 
@@ -318,9 +359,11 @@ public class test : MonoBehaviour
     public void onclickOnword()
     {
 
-        //win_page.SetActive(false);
+        win_page.SetActive(false);
         //puzzle.SetActive(true);
-        SceneManager.LoadScene(Application.loadedLevel);
+        StartCoroutine(get_Single_puzzle(jSON_getpuzzle[L_no - 1]["_id"], L_no));
+        isended = false;
+        //SceneManager.LoadScene(Application.loadedLevel);
     }
     public void onclickHint()
     {
@@ -345,6 +388,35 @@ public class test : MonoBehaviour
                 break;
             }
         }
-        win(jSON);
+        StartCoroutine(win(jSON));
+    }
+    int spkiped;
+    public void onclickSkip()
+    {
+        isskiped = true;
+        spkiped++;
+        if (spkiped == 1)
+        {
+
+            if (L_no != total_level)
+            {
+
+                L_no++;
+                PlayerPrefs.SetInt("max_" + jSON[0]["cat_id"], L_no);
+            }
+            Debug.Log(jSON[0]["cat_id"]);
+            //level();
+            Debug.Log("level_no " + L_no);
+            Debug.Log(jSON_getpuzzle[L_no - 1]);
+            Debug.Log(jSON_getpuzzle[L_no - 1]["_id"]);
+            puzzle.SetActive(false);
+            play.SetActive(false);
+            string str = jSON_getpuzzle[L_no - 1]["_id"];
+            Debug.Log("string   " + str);
+            StartCoroutine(get_Single_puzzle(str, L_no));
+
+        }
+        Debug.Log(spkiped);
+
     }
 }
